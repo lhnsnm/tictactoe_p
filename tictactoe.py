@@ -32,6 +32,7 @@ def make_move(board, spot, move="O", name="Computer"):
     except ValueError:
         return False
     
+
 def check_winner(board, player = "O"):
     win_patterns = [
         [(0,0), (0,1), (0,2)],
