@@ -52,7 +52,7 @@ def make_move(board, spot, move="O", name="Computer"):
 def check_def_spot(board):
     # Check the pattern and return the defensive spot coordinates.
     # If the pattern contains two X and an empty spot, return the coordinates.
-    def_spot = []
+    def_spot = -1
     for pattern in win_patterns:
         x_count = 0
         o_count = 0
@@ -65,7 +65,7 @@ def check_def_spot(board):
             elif curr_spot == 'O':
                 o_count += 1
             else:
-                empty_spot = [r, c]
+                empty_spot = board[r][c]
             
         if empty_spot and (x_count == 2 and o_count == 0):
             return empty_spot
