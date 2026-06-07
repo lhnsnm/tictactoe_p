@@ -23,9 +23,11 @@ def create_board():
 
 
 def display_board(board):
+    print()
     for row in board:
         print('|'.join(row))
         print('-' * 5)
+    print()
 
 
 def make_move(board, spot, move="O", name="Computer"):
@@ -41,7 +43,7 @@ def make_move(board, spot, move="O", name="Computer"):
             return False
         else:
             board[row][col] = move
-            print(f"{name} successfully made a move at position {spot}!\n")
+            print(f"{name} successfully made a move at position {spot}!")
             display_board(board)
             return True
     except ValueError:
@@ -52,12 +54,10 @@ def make_move(board, spot, move="O", name="Computer"):
 def check_def_spot(board):
     # Check the pattern and return the defensive spot coordinates.
     # If the pattern contains two X and an empty spot, return the coordinates.
-    def_spot = -1
     for pattern in win_patterns:
         x_count = 0
         o_count = 0
-        empty_spot = []
-        
+        empty_spot = -1
         for r, c in pattern:
             curr_spot = board[r][c]
             if curr_spot == 'X':
@@ -67,16 +67,33 @@ def check_def_spot(board):
             else:
                 empty_spot = board[r][c]
             
-        if empty_spot and (x_count == 2 and o_count == 0):
+        if empty_spot not in ['X', 'O'] and (x_count == 2 and o_count == 0):
             return empty_spot
             
-    return def_spot
+    return -1
 
 
 # Offensive AI function
-def make_offensive_move():
-    # Computer should try to build consecutive symbols.
-    return True
+def make_offensive_move(board, spot = -1):
+    # This function should try to build moves based on the winning patterns.
+    # Check any previous move and add another move.
+    if spot != -1:
+        return make_move(board, spot)
+    for pattern in win_patterns:
+        o_count = 0
+        x_count = 0
+        empty_spot = 0
+        for r, c in pattern:
+            curr_spot = board[r][c]
+            if curr_spot == 'O':
+                o_count += 1
+            elif curr_spot == 'X':
+                x_count += 1
+            else:
+                empty_spot = curr_spot
+        if empty_spot not in ['X', 'O'] and (o_count == 1 and x_count == 0):
+            return make_move(board, empty_spot)
+    return make_move(board, random.randint(1, 9))
 
 
 def check_winner(board, player = "O"):
@@ -114,24 +131,40 @@ def check_input(user_input):
         return False
 
 
+def whose_turn():
+    is_turn = input("\nWho do want to pick first?\nPress 1: Player\nPress 2: Computer\nType here: ")
+        
+    if is_turn == "1":
+        print("Your turn first!\n")
+        return True
+    elif is_turn == "2":
+        print("The computer will pick first!\n")
+        return False
+    else:
+        print("\nYou've entered an invalid answer. The computer will pick first!\n")
+        return False
+
+
 def play_game():
     player_name = input("Who are you? Type your name: ").capitalize()
     current_board = create_board()
-    is_turn = "computer"
     input_error = False
+    loop_count = 0
+    is_turn = "computer" if not whose_turn() else "player"
 
     while True:
         # Computer Turn
         if is_turn == "computer":
             print("Computer is making a move...\n")
-
-            check_winning_spot = check_def_spot(current_board)
-            print(check_winning_spot)
-
-            if not make_move(current_board, random.randint(1, 9)):
-                continue
-
-            is_turn = "player"
+            def_spot = check_def_spot(current_board)
+            if def_spot != -1:
+                if not make_offensive_move(current_board, def_spot):
+                    continue
+                is_turn = "player"
+            else:
+                if not make_offensive_move(current_board):
+                    continue
+                is_turn = "player"
 
             if check_winner(current_board):
                 print("Computer wins! Try again.\n")
@@ -144,10 +177,10 @@ def play_game():
         # Player Turn
         if is_turn == "player":
             if not input_error:
-                print(f"It's your turn now, {player_name}! Please make a move.")
-                prompt = "\nEnter a number between 1-9 as your position. Or type -1 to exit: "
+                print(f"Hello, {player_name}! Please make a move..." if loop_count == 0 else f"It's your turn now, {player_name}! Make a move.")
+                prompt = "Enter a number between 1-9 as your position. Or type -1 to exit: "
             else:
-                prompt = "Try again: "
+                prompt = "Oops! Try again: "
             
             player_input = input(prompt)
 
@@ -173,6 +206,8 @@ def play_game():
             if is_draw(current_board):
                 print("Woah! It's a draw!")
                 break
-
+        
+        loop_count += 1
+        
 
 play_game()
