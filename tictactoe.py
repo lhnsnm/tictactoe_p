@@ -1,5 +1,20 @@
 import random
 
+
+win_patterns = [
+        [(0,0), (0,1), (0,2)],
+        [(1,0), (1,1), (1,2)],
+        [(2,0), (2,1), (2,2)],
+
+        [(0,0), (1,0), (2,0)],
+        [(0,1), (1,1), (2,1)],
+        [(0,2), (1,2), (2,2)],
+
+        [(0,0), (1,1), (2,2)],
+        [(0,2), (1,1), (2,0)],
+    ]
+
+
 def create_board():
     board_space = []
     for start in range(1, 10, 3):
@@ -31,22 +46,40 @@ def make_move(board, spot, move="O", name="Computer"):
             return True
     except ValueError:
         return False
-    
+
+
+# Defensive AI function
+def check_def_spot(board):
+    # Check the pattern and return the defensive spot coordinates.
+    # If the pattern contains two X and an empty spot, return the coordinates.
+    def_spot = []
+    for pattern in win_patterns:
+        x_count = 0
+        o_count = 0
+        empty_spot = []
+        
+        for r, c in pattern:
+            curr_spot = board[r][c]
+            if curr_spot == 'X':
+                x_count += 1
+            elif curr_spot == 'O':
+                o_count += 1
+            else:
+                empty_spot = [r, c]
+            
+        if empty_spot and (x_count == 2 and o_count == 0):
+            return empty_spot
+            
+    return def_spot
+
+
+# Offensive AI function
+def make_offensive_move():
+    # Computer should try to build consecutive symbols.
+    return True
+
 
 def check_winner(board, player = "O"):
-    win_patterns = [
-        [(0,0), (0,1), (0,2)],
-        [(1,0), (1,1), (1,2)],
-        [(2,0), (2,1), (2,2)],
-
-        [(0,0), (1,0), (2,0)],
-        [(0,1), (1,1), (2,1)],
-        [(0,2), (1,2), (2,2)],
-
-        [(0,0), (1,1), (2,2)],
-        [(0,2), (1,1), (2,0)],
-    ]
-
     for pattern in win_patterns:
         won = True  # assume this pattern is a win
 
@@ -91,6 +124,9 @@ def play_game():
         # Computer Turn
         if is_turn == "computer":
             print("Computer is making a move...\n")
+
+            check_winning_spot = check_def_spot(current_board)
+            print(check_winning_spot)
 
             if not make_move(current_board, random.randint(1, 9)):
                 continue
